@@ -51,22 +51,31 @@ Deployment
 
 # Development Phases
 
-## Phase 1 — Project Foundation
+## Phase 1 — Project Foundation ✅
+
+**Status: Completed**
 
 Goal:
 Prepare a scalable project structure.
 
 Tasks:
 - Configure frontend/backend
-- Authentication
-- User management
-- Database migrations
-- Shared layouts
-- API client
+- Authentication (Sanctum token-based API)
+- User management (CRUD with admin/kasir roles)
+- Database migrations (users, personal_access_tokens, role column)
+- API routes (public + protected + admin)
 - Environment configuration
+- Middleware for admin authorization
 
 Deliverable:
 Working authentication and project skeleton.
+
+### What was built
+- `POST /api/register` & `POST /api/login` & `POST /api/logout` & `GET /api/user`
+- `GET/POST/PUT/DELETE /api/users` (admin only)
+- `is_admin` middleware for route protection
+- `role` column (admin/kasir) on users table
+- Default seeders: admin@waroeng.test / kasir@waroeng.test (password: password)
 
 ---
 
