@@ -110,18 +110,28 @@ Complete product management.
 
 ---
 
-## Phase 3 — Supplier Management
+## Phase 3 — Supplier Management ✅
+
+**Status: Completed**
 
 Goal:
 Manage suppliers.
 
 Features:
 - CRUD suppliers
-- Contact information
-- Purchase history
+- Contact information (phone, address, notes)
+- Purchase history (data structure ready, feature in Phase 4)
 
 Deliverable:
 Supplier module completed.
+
+### What was built
+- `GET/POST /api/suppliers`, `PUT/DELETE /api/suppliers/{id}` — CRUD supplier
+- `GET /api/suppliers/{id}/products` — list produk dari supplier
+- FK constraint `products.supplier_id → suppliers.id` (on delete set null)
+- Relasi `belongsTo(Supplier)` di Product model
+- Validasi `supplier_id` di create/update product (exists:suppliers)
+- 3 supplier di-seed (PT Sinar Jaya Abadi, CV Maju Makmur, UD Berkah Jaya)
 
 ---
 

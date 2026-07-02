@@ -13,7 +13,7 @@ class ProductController extends Controller
 {
     public function index(): JsonResponse
     {
-        $products = Product::with('category')->orderBy('name')->get()->map(function ($product) {
+        $products = Product::with('category', 'supplier')->orderBy('name')->get()->map(function ($product) {
             $product->stock = $product->current_stock;
             return $product;
         });
@@ -29,7 +29,7 @@ class ProductController extends Controller
             'cost_price' => ['required', 'integer', 'min:0'],
             'selling_price' => ['required', 'integer', 'min:0'],
             'category_id' => ['nullable', 'exists:categories,id'],
-            'supplier_id' => ['nullable'],
+            'supplier_id' => ['nullable', 'exists:suppliers,id'],
             'initial_stock' => ['nullable', 'integer', 'min:0'],
         ]);
 
@@ -58,7 +58,7 @@ class ProductController extends Controller
             return $product;
         });
 
-        $product->load('category');
+        $product->load('category', 'supplier');
         $product->stock = $product->current_stock;
 
         return response()->json($product, 201);
@@ -66,7 +66,7 @@ class ProductController extends Controller
 
     public function show(Product $product): JsonResponse
     {
-        $product->load('category');
+        $product->load('category', 'supplier');
         $product->stock = $product->current_stock;
 
         return response()->json($product);
@@ -80,11 +80,11 @@ class ProductController extends Controller
             'cost_price' => ['sometimes', 'integer', 'min:0'],
             'selling_price' => ['sometimes', 'integer', 'min:0'],
             'category_id' => ['nullable', 'exists:categories,id'],
-            'supplier_id' => ['nullable'],
+            'supplier_id' => ['nullable', 'exists:suppliers,id'],
         ]);
 
         $product->update($validated);
-        $product->load('category');
+        $product->load('category', 'supplier');
         $product->stock = $product->current_stock;
 
         return response()->json($product);
