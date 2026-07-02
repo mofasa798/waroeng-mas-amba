@@ -79,7 +79,9 @@ Working authentication and project skeleton.
 
 ---
 
-## Phase 2 — Product Management
+## Phase 2 — Product Management ✅
+
+**Status: Completed**
 
 Goal:
 Manage store products.
@@ -91,10 +93,20 @@ Features:
 - Cost price
 - Selling price
 - Initial stock
-- Supplier assignment
+- Supplier assignment (column ready, feature in Phase 3)
 
 Deliverable:
 Complete product management.
+
+### What was built
+- `GET/POST /api/categories`, `PUT/DELETE /api/categories/{id}` — CRUD kategori
+- `GET/POST /api/products`, `PUT/DELETE /api/products/{id}` — CRUD produk
+- `GET /api/products/{id}/stock` — stok dihitung dari stock_movements
+- Initial stock otomatis tercatat sebagai `stock_movement type=in` saat create product
+- Stok dihitung dari SUM(in) - SUM(out), bukan kolom langsung
+- Semua operasi stok pakai database transaction
+- 8 kategori di-seed (Makanan Ringan, Minuman, dll.)
+- `supplier_id` ada di kolom (nullable), FK akan aktif di Phase 3
 
 ---
 
