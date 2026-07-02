@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +28,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Products
     Route::get('products/{product}/stock', [ProductController::class, 'stock']);
     Route::apiResource('products', ProductController::class);
+
+    // Suppliers
+    Route::get('suppliers/{supplier}/products', [SupplierController::class, 'products']);
+    Route::apiResource('suppliers', SupplierController::class);
 
     // Admin only routes
     Route::middleware('is_admin')->group(function () {
