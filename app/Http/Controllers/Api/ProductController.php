@@ -92,7 +92,7 @@ class ProductController extends Controller
 
     public function destroy(Product $product): JsonResponse
     {
-        $product->delete();
+        Product::destroy($product->id);
 
         return response()->json(['message' => 'Product deleted.']);
     }
