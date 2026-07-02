@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\PosController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\StockMovementController;
 use App\Http\Controllers\Api\SupplierController;
@@ -27,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('categories', CategoryController::class);
 
     // Products
+    Route::get('products/search', [PosController::class, 'search']);
     Route::get('products/{product}/stock', [ProductController::class, 'stock']);
     Route::post('products/{product}/restock', [ProductController::class, 'restock']);
     Route::apiResource('products', ProductController::class);
@@ -37,6 +39,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Stock Movements
     Route::get('stock-movements', [StockMovementController::class, 'index']);
+
+    // POS (Cashier)
+    Route::post('checkout', [PosController::class, 'checkout']);
+    Route::get('sales/{sale}', [PosController::class, 'show']);
 
     // Admin only routes
     Route::middleware('is_admin')->group(function () {
