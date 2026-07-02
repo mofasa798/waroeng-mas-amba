@@ -163,7 +163,9 @@ Reliable inventory tracking.
 
 ---
 
-## Phase 5 — POS (Cashier)
+## Phase 5 — POS (Cashier) ✅
+
+**Status: Completed**
 
 Goal:
 Fast checkout process.
@@ -181,6 +183,16 @@ Speed over appearance.
 
 Deliverable:
 Fully functional cashier system.
+
+### What was built
+- `GET /api/products/search?q=` — search by name (like) or barcode (exact)
+- `POST /api/checkout` — transaksi dalam 1 DB transaction
+- `GET /api/sales/{sale}` — invoice detail
+- Tables: `sales` (invoice_number, total, discount, grand_total, user_id), `sale_items` (sale_id, product_id, quantity, price)
+- Invoice format: `INV-YYYYMMDD-XXXX` (auto-increment per hari)
+- Validasi stok cukup sebelum checkout (abort 422 jika kurang)
+- Stock movement type `out` untuk setiap item terjual
+- Diskon dalam rupiah integer
 
 ---
 
