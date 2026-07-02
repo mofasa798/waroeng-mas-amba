@@ -110,4 +110,58 @@ class ProductController extends Controller
             'stock' => $stock,
         ]);
     }
+
+    /**
+     * Restock a product (add stock).
+     */
+    public function restock(Request $request, Product $product): JsonResponse
+    {
+        $validated = $request->validate([
+            'quantity' => ['required', 'integer', 'min:1'],
+            'note' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        DB::transaction(function () use ($validated, $product, $request) {
+            StockMovement::create([
+                'product_id' => $product->id,
+                'type' => 'in',
+                'quantity' => $validated['quantity'],
+                'note' => $validated['note'] ?? 'Restock',
+                'user_id' => $request->user()->id,
+            ]);
+        });
+
+        return response()->json([
+            'message' => 'Stock added successfully.',
+            'product_id' => $product->id,
+            'stock' => $product->fresh()->current_stock,
+        ]);
+    }
+
+    /**
+     * Adjust stock (positive or negative). Admin only.
+     */
+    public function adjustStock(Request $request, Product $product): JsonResponse
+    {
+        $validated = $request->validate([
+            'quantity' => ['required', 'integer'],
+            'note' => ['required', 'string', 'max:500'],
+        ]);
+
+        DB::transaction(function () use ($validated, $product, $request) {
+            StockMovement::create([
+                'product_id' => $product->id,
+                'type' => 'adjustment',
+                'quantity' => $validated['quantity'],
+                'note' => $validated['note'],
+                'user_id' => $request->user()->id,
+            ]);
+        });
+
+        return response()->json([
+            'message' => 'Stock adjusted successfully.',
+            'product_id' => $product->id,
+            'stock' => $product->fresh()->current_stock,
+        ]);
+    }
 }

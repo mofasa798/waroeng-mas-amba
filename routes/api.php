@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\StockMovementController;
 use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
@@ -27,11 +28,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Products
     Route::get('products/{product}/stock', [ProductController::class, 'stock']);
+    Route::post('products/{product}/restock', [ProductController::class, 'restock']);
     Route::apiResource('products', ProductController::class);
 
     // Suppliers
     Route::get('suppliers/{supplier}/products', [SupplierController::class, 'products']);
     Route::apiResource('suppliers', SupplierController::class);
+
+    // Stock Movements
+    Route::get('stock-movements', [StockMovementController::class, 'index']);
 
     // Admin only routes
     Route::middleware('is_admin')->group(function () {
@@ -39,5 +44,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/users', [UserController::class, 'store']);
         Route::put('/users/{user}', [UserController::class, 'update']);
         Route::delete('/users/{user}', [UserController::class, 'destroy']);
+
+        // Stock adjustment (admin only)
+        Route::post('products/{product}/adjust-stock', [ProductController::class, 'adjustStock']);
     });
 });

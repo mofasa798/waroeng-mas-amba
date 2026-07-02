@@ -135,7 +135,9 @@ Supplier module completed.
 
 ---
 
-## Phase 4 — Inventory Management
+## Phase 4 — Inventory Management ✅
+
+**Status: Completed**
 
 Goal:
 Build a reliable inventory system.
@@ -151,6 +153,13 @@ Rules:
 
 Deliverable:
 Reliable inventory tracking.
+
+### What was built
+- `POST /api/products/{id}/restock` — tambah stok (type: in), wajib quantity, note opsional
+- `POST /api/products/{id}/adjust-stock` — adjust stok (type: adjustment), quantity bisa negatif, wajib note. Admin only.
+- `GET /api/stock-movements` — riwayat semua pergerakan stok, support filter `?product_id=`
+- Semua operasi stok pakai database transaction
+- Stok tetap dihitung dari SUM(in) - SUM(out) + SUM(adjustment)
 
 ---
 

@@ -45,6 +45,10 @@ class Product extends Model
             ->where('type', 'out')
             ->sum('quantity');
 
-        return $in - $out;
+        $adjustment = $this->stockMovements()
+            ->where('type', 'adjustment')
+            ->sum('quantity');
+
+        return ($in - $out) + $adjustment;
     }
 }
