@@ -5,10 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\StockMovement;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class InventoryInsightController extends Controller
 {
@@ -58,7 +56,7 @@ class InventoryInsightController extends Controller
                 $product->stock = $product->current_stock;
 
                 // Calculate 30-day sales
-                $totalSold = StockMovement::where('product_id', $product->id)
+                $totalSold = StockMovement::where('product_id', '=', $product->id, 'and')
                     ->where('type', 'out')
                     ->where('created_at', '>=', $since)
                     ->sum('quantity');
@@ -113,7 +111,7 @@ class InventoryInsightController extends Controller
                 $product->stock = $product->current_stock;
 
                 // Find last sale (stock_movement type: out)
-                $lastSale = StockMovement::where('product_id', $product->id)
+                $lastSale = StockMovement::where('product_id', '=', $product->id, 'and')
                     ->where('type', 'out')
                     ->orderByDesc('created_at')
                     ->first();
@@ -123,7 +121,7 @@ class InventoryInsightController extends Controller
                     ? (int) $lastSoldDate->diffInDays(now())
                     : null; // never sold
 
-                $salesInPeriod = StockMovement::where('product_id', $product->id)
+                $salesInPeriod = StockMovement::where('product_id', '=', $product->id, 'and')
                     ->where('type', 'out')
                     ->where('created_at', '>=', $since)
                     ->sum('quantity');
