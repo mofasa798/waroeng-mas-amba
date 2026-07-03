@@ -222,7 +222,9 @@ Complete sales history.
 
 ---
 
-## Phase 7 — Reports
+## Phase 7 — Reports ✅
+
+**Status: Completed**
 
 Goal:
 Generate business reports.
@@ -238,6 +240,13 @@ Reports:
 
 Deliverable:
 Business reporting system.
+
+### What was built
+- `GET /api/reports/summary?period=daily|weekly|monthly|yearly&date=` — period summary with gross profit
+- `GET /api/reports/best-sellers?period=daily|weekly|monthly&date=` — top 10 by qty sold
+- `GET /api/reports/slow-movers?days=30` — products with least sales
+- Gross profit: SUM((selling_price - cost_price) × qty) via join sale_items → products
+- ReportController terpisah untuk clean separation
 
 ---
 
