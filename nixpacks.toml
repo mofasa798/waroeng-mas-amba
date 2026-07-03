@@ -1,0 +1,6 @@
+# Railway deployment config for Laravel
+[nixpacks]
+provider = "php"
+
+[php]
+framework = "laravel"

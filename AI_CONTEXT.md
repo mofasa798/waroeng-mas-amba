@@ -307,7 +307,9 @@ Production-ready UX.
 
 ---
 
-## Phase 10 — Production
+## Phase 10 — Production ✅
+
+**Status: Completed**
 
 Goal:
 Deploy stable application.
@@ -322,6 +324,14 @@ Tasks:
 
 Deliverable:
 Stable production release.
+
+### What was built
+- Procfile + nixpacks.toml for Railway deployment (auto-detect Laravel)
+- `.env.example` updated with PostgreSQL + production config
+- `config/sanctum.php` stateful domains configured (SANCTUM_STATEFUL_DOMAINS + FRONTEND_URL)
+- `bootstrap/app.php` — statefulApi middleware enabled for SPA CORS
+- `README.md` updated: project structure, local setup, API docs, default credentials, deployment guide
+- Database principles documented
 
 ---
 
