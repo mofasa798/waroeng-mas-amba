@@ -76,7 +76,7 @@ class UserController extends Controller
     public function destroy(Request $request, User $user): JsonResponse
     {
         // Prevent deleting self
-        if ($request->user('web')->id === $user->id) {
+        if ($request->user()->id === $user->id) {
             return response()->json(['message' => 'Cannot delete your own account.'], 422);
         }
 
