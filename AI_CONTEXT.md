@@ -275,7 +275,9 @@ Inventory insights.
 
 ---
 
-## Phase 9 — Optimization
+## Phase 9 — Optimization ✅
+
+**Status: Completed**
 
 Goal:
 Improve usability.
@@ -290,6 +292,18 @@ Tasks:
 
 Deliverable:
 Production-ready UX.
+
+### What was built
+- Frontend Next.js app di `frontend/` dengan TypeScript + Tailwind CSS v4
+- Auth: Login page, token management via localStorage, auto-attach ke axios, auto-redirect 401
+- Layout: Sidebar responsive (mobile hamburger), Header (user info + logout)
+- POS (`/pos`): search produk, keranjang real-time, +/- qty, diskon, checkout
+- CRUD pages: Produk, Kategori, Supplier (list + add + delete)
+- Sales (`/sales`): list transaksi, filter date, invoice lookup & detail
+- Inventory (`/inventory`): restock, adjust stock, riwayat movement, smart insights (low stock, restock suggestion, dead stock)
+- Loading states, error handling, empty states
+- Axios API client dengan interceptor token & 401 redirect
+- Build size: ~102kB shared + pages 123-135kB
 
 ---
 
