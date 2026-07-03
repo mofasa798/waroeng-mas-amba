@@ -196,7 +196,9 @@ Fully functional cashier system.
 
 ---
 
-## Phase 6 — Sales History
+## Phase 6 — Sales History ✅
+
+**Status: Completed**
 
 Goal:
 Track every sale.
@@ -209,6 +211,14 @@ Features:
 
 Deliverable:
 Complete sales history.
+
+### What was built
+- `GET /api/sales` — list transaksi paginated, filter by `?date=`, `?from=&to=`
+- `GET /api/sales/lookup?invoice=INV-...` — cari by invoice number
+- `GET /api/sales/daily-summary?date=YYYY-MM-DD` — ringkasan harian (total transaksi, revenue, diskon, items sold)
+- `GET /api/sales/{sale}` — detail transaksi (dari Phase 5)
+- Semua endpoint eager-load relasi (items, product, user)
+- Urut dari terbaru
 
 ---
 
