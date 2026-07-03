@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/lib/auth";
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -53,6 +54,12 @@ export default function LoginPage() {
         >
           {loading ? "Loading..." : "Login"}
         </button>
+        <p className="text-center text-lg">
+          Belum punya akun?{" "}
+          <Link href="/register" className="text-blue-600 hover:underline font-semibold">
+            Daftar
+          </Link>
+        </p>
       </form>
     </div>
   );
