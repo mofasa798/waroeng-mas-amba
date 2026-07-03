@@ -30,45 +30,45 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('categories', CategoryController::class);
 
     // Products
-    Route::get('products/search', [PosController::class, 'search']);
-    Route::get('products/{product}/stock', [ProductController::class, 'stock']);
-    Route::post('products/{product}/restock', [ProductController::class, 'restock']);
+    Route::get('products/search', [PosController::class, 'search'])->name('products.search');
+    Route::get('products/{product}/stock', [ProductController::class, 'stock'])->name('products.stock');
+    Route::post('products/{product}/restock', [ProductController::class, 'restock'])->name('products.restock');
     Route::apiResource('products', ProductController::class);
 
     // Suppliers
-    Route::get('suppliers/{supplier}/products', [SupplierController::class, 'products']);
+    Route::get('suppliers/{supplier}/products', [SupplierController::class, 'products'])->name('suppliers.products');
     Route::apiResource('suppliers', SupplierController::class);
 
     // Stock Movements
-    Route::get('stock-movements', [StockMovementController::class, 'index']);
+    Route::get('stock-movements', [StockMovementController::class, 'index'])->name('stock-movements.index');
 
     // POS (Cashier)
-    Route::post('checkout', [PosController::class, 'checkout']);
+    Route::post('checkout', [PosController::class, 'checkout'])->name('pos.checkout');
 
     // Sales History
-    Route::get('sales/lookup', [PosController::class, 'lookup']);
-    Route::get('sales/daily-summary', [PosController::class, 'dailySummary']);
-    Route::get('sales/{sale}', [PosController::class, 'show']);
-    Route::get('sales', [PosController::class, 'index']);
+    Route::get('sales/lookup', [PosController::class, 'lookup'])->name('sales.lookup');
+    Route::get('sales/daily-summary', [PosController::class, 'dailySummary'])->name('sales.daily-summary');
+    Route::get('sales/{sale}', [PosController::class, 'show'])->name('sales.show');
+    Route::get('sales', [PosController::class, 'index'])->name('sales.index');
 
     // Reports
-    Route::get('reports/summary', [ReportController::class, 'summary']);
-    Route::get('reports/best-sellers', [ReportController::class, 'bestSellers']);
-    Route::get('reports/slow-movers', [ReportController::class, 'slowMovers']);
+    Route::get('reports/summary', [ReportController::class, 'summary'])->name('reports.summary');
+    Route::get('reports/best-sellers', [ReportController::class, 'bestSellers'])->name('reports.best-sellers');
+    Route::get('reports/slow-movers', [ReportController::class, 'slowMovers'])->name('reports.slow-movers');
 
     // Inventory Insights
-    Route::get('inventory/low-stock', [InventoryInsightController::class, 'lowStock']);
-    Route::get('inventory/suggested-restock', [InventoryInsightController::class, 'suggestedRestock']);
-    Route::get('inventory/dead-stock', [InventoryInsightController::class, 'deadStock']);
+    Route::get('inventory/low-stock', [InventoryInsightController::class, 'lowStock'])->name('inventory.low-stock');
+    Route::get('inventory/suggested-restock', [InventoryInsightController::class, 'suggestedRestock'])->name('inventory.suggested-restock');
+    Route::get('inventory/dead-stock', [InventoryInsightController::class, 'deadStock'])->name('inventory.dead-stock');
 
     // Admin only routes
     Route::middleware('is_admin')->group(function () {
-        Route::get('/users', [UserController::class, 'index']);
-        Route::post('/users', [UserController::class, 'store']);
-        Route::put('/users/{user}', [UserController::class, 'update']);
-        Route::delete('/users/{user}', [UserController::class, 'destroy']);
+        Route::get('users', [UserController::class, 'index'])->name('users.index');
+        Route::post('users', [UserController::class, 'store'])->name('users.store');
+        Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
         // Stock adjustment (admin only)
-        Route::post('products/{product}/adjust-stock', [ProductController::class, 'adjustStock']);
+        Route::post('products/{product}/adjust-stock', [ProductController::class, 'adjustStock'])->name('products.adjust-stock');
     });
 });
