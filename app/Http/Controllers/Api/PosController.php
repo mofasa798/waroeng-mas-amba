@@ -83,7 +83,7 @@ class PosController extends Controller
 
             // Generate invoice number
             $date = now()->format('Ymd');
-            $lastSale = Sale::whereDate('created_at', today())->count();
+            $lastSale = Sale::whereDate('created_at', '=', today(), 'and')->count();
             $invoiceNumber = sprintf('INV-%s-%04d', $date, $lastSale + 1);
 
             // Create sale
@@ -187,7 +187,7 @@ class PosController extends Controller
     {
         $date = $request->get('date', today()->format('Y-m-d'));
 
-        $summary = Sale::whereDate('created_at', $date)
+        $summary = Sale::whereDate('created_at', '=', $date, 'and')
             ->selectRaw('
                 COUNT(*) as total_transactions,
                 COALESCE(SUM(total), 0) as total_revenue,
