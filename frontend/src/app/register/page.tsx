@@ -1,24 +1,24 @@
 "use client";
 
 import { useAuth } from "@/lib/auth";
+import { useToast } from "@/components/Toast";
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 
 export default function RegisterPage() {
   const { login } = useAuth();
+  const { toast } = useToast();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError("");
 
     if (password !== passwordConfirmation) {
-      setError("Password dan konfirmasi password tidak cocok.");
+      toast("Password dan konfirmasi password tidak cocok.", "error");
       return;
     }
 
@@ -31,18 +31,24 @@ export default function RegisterPage() {
         password,
         password_confirmation: passwordConfirmation,
       });
+      toast("Registrasi berhasil! Login otomatis...", "success");
       // Auto-login after register
       await login(email, password);
-      window.location.href = "/";
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 800);
     } catch (err: any) {
-      const msg = err.response?.data?.message;
-      const errors = err.response?.data?.errors;
-      if (errors?.email) {
-        setError(errors.email[0]);
-      } else if (msg) {
-        setError(msg);
+      if (!err.response) {
+        toast("Gagal terhubung ke server. Pastikan backend berjalan.", "error");
       } else {
-        setError("Registrasi gagal. Coba lagi.");
+        const errors = err.response?.data?.errors;
+        if (errors?.email) {
+          toast(errors.email[0], "error");
+        } else if (errors?.password) {
+          toast(errors.password[0], "error");
+        } else {
+          toast(err.response?.data?.message || "Registrasi gagal. Coba lagi.", "error");
+        }
       }
     } finally {
       setLoading(false);
@@ -54,7 +60,6 @@ export default function RegisterPage() {
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
         <h1 className="text-3xl font-bold text-center mb-2">Waroeng Mas Amba</h1>
         <p className="text-center text-gray-500 mb-6 text-lg">Buat akun baru</p>
-        {error && <p className="bg-red-100 text-red-700 p-3 rounded-xl mb-4 text-center text-lg">{error}</p>}
         <input
           type="text"
           placeholder="Nama lengkap"
@@ -94,7 +99,7 @@ export default function RegisterPage() {
           disabled={loading}
           className="w-full bg-blue-600 text-white p-4 text-lg rounded-xl font-semibold hover:bg-blue-700 disabled:opacity-50 mb-4"
         >
-          {loading ? "Loading..." : "Daftar"}
+          {loading ? "Memproses..." : "Daftar"}
         </button>
         <p className="text-center text-lg">
           Sudah punya akun?{" "}
