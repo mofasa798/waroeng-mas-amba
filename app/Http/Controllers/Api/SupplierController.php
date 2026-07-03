@@ -11,7 +11,7 @@ class SupplierController extends Controller
 {
     public function index(): JsonResponse
     {
-        return response()->json(Supplier::orderBy('name')->get());
+        return response()->json(Supplier::orderBy('name', 'asc')->get());
     }
 
     public function store(Request $request): JsonResponse
@@ -49,7 +49,7 @@ class SupplierController extends Controller
 
     public function destroy(Supplier $supplier): JsonResponse
     {
-        $supplier->delete();
+        Supplier::destroy($supplier->id);
 
         return response()->json(['message' => 'Supplier deleted.']);
     }

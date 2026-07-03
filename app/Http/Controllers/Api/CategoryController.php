@@ -11,7 +11,7 @@ class CategoryController extends Controller
 {
     public function index(): JsonResponse
     {
-        return response()->json(Category::orderBy('name')->get());
+        return new JsonResponse(Category::orderBy('name', 'asc')->get(), 200);
     }
 
     public function store(Request $request): JsonResponse
@@ -41,8 +41,9 @@ class CategoryController extends Controller
         return response()->json($category);
     }
 
-    public function destroy(Category $category): JsonResponse
+    public function destroy(int $id): JsonResponse
     {
+        $category = Category::findOrFail($id);
         $category->delete();
 
         return response()->json(['message' => 'Category deleted.']);
