@@ -16,12 +16,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            CategorySeeder::class,
-            SupplierSeeder::class,
-        ]);
-
-        // Admin default
+        // Admin default (harus sebelum ProductSeeder karena StockMovement membutuhkan user_id)
         User::create([
             'name' => 'Admin Waroeng',
             'email' => 'admin@waroeng.test',
@@ -29,12 +24,10 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin',
         ]);
 
-        // Kasir default
-        User::create([
-            'name' => 'Kasir Waroeng',
-            'email' => 'kasir@waroeng.test',
-            'password' => Hash::make('password'),
-            'role' => 'kasir',
+        $this->call([
+            CategorySeeder::class,
+            SupplierSeeder::class,
+            ProductSeeder::class,
         ]);
     }
 }
