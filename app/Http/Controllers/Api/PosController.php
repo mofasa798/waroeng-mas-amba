@@ -132,4 +132,82 @@ class PosController extends Controller
 
         return response()->json($sale);
     }
+
+    /**
+     * List sales with filters.
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $query = Sale::with('user:id,name')
+            ->withCount('items')
+            ->orderBy('created_at', 'desc');
+
+        // Filter by single date
+        if ($request->filled('date')) {
+            $query->whereDate('created_at', $request->date);
+        }
+
+        // Filter by date range
+        if ($request->filled('from')) {
+            $query->whereDate('created_at', '>=', $request->from);
+        }
+        if ($request->filled('to')) {
+            $query->whereDate('created_at', '<=', $request->to);
+        }
+
+        $sales = $query->paginate($request->per_page ?? 50);
+
+        return response()->json($sales);
+    }
+
+    /**
+     * Lookup a sale by invoice number.
+     */
+    public function lookup(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'invoice' => ['required', 'string', 'max:50'],
+        ]);
+
+        $sale = Sale::with('items.product', 'user')
+            ->where('invoice_number', $validated['invoice'])
+            ->first();
+
+        if (!$sale) {
+            return response()->json(['message' => 'Invoice not found.'], 404);
+        }
+
+        return response()->json($sale);
+    }
+
+    /**
+     * Daily sales summary.
+     */
+    public function dailySummary(Request $request): JsonResponse
+    {
+        $date = $request->get('date', today()->format('Y-m-d'));
+
+        $summary = Sale::whereDate('created_at', $date)
+            ->selectRaw('
+                COUNT(*) as total_transactions,
+                COALESCE(SUM(total), 0) as total_revenue,
+                COALESCE(SUM(discount), 0) as total_discount,
+                COALESCE(SUM(grand_total), 0) as grand_total
+            ')
+            ->first();
+
+        // Count total items sold
+        $totalItems = SaleItem::whereHas('sale', function ($q) use ($date) {
+            $q->whereDate('created_at', $date);
+        })->sum('quantity');
+
+        return response()->json([
+            'date' => $date,
+            'total_transactions' => (int) $summary->total_transactions,
+            'total_revenue' => (int) $summary->total_revenue,
+            'total_discount' => (int) $summary->total_discount,
+            'grand_total' => (int) $summary->grand_total,
+            'total_items_sold' => (int) $totalItems,
+        ]);
+    }
 }

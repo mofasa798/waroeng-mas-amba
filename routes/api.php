@@ -42,7 +42,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // POS (Cashier)
     Route::post('checkout', [PosController::class, 'checkout']);
+
+    // Sales History
+    Route::get('sales/lookup', [PosController::class, 'lookup']);
+    Route::get('sales/daily-summary', [PosController::class, 'dailySummary']);
     Route::get('sales/{sale}', [PosController::class, 'show']);
+    Route::get('sales', [PosController::class, 'index']);
 
     // Admin only routes
     Route::middleware('is_admin')->group(function () {
