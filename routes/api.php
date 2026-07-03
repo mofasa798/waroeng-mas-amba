@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\InventoryInsightController;
 use App\Http\Controllers\Api\PosController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReportController;
@@ -54,6 +55,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('reports/summary', [ReportController::class, 'summary']);
     Route::get('reports/best-sellers', [ReportController::class, 'bestSellers']);
     Route::get('reports/slow-movers', [ReportController::class, 'slowMovers']);
+
+    // Inventory Insights
+    Route::get('inventory/low-stock', [InventoryInsightController::class, 'lowStock']);
+    Route::get('inventory/suggested-restock', [InventoryInsightController::class, 'suggestedRestock']);
+    Route::get('inventory/dead-stock', [InventoryInsightController::class, 'deadStock']);
 
     // Admin only routes
     Route::middleware('is_admin')->group(function () {

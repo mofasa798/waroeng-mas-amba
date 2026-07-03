@@ -250,7 +250,9 @@ Business reporting system.
 
 ---
 
-## Phase 8 — Smart Inventory
+## Phase 8 — Smart Inventory ✅
+
+**Status: Completed**
 
 Goal:
 Help store owners make decisions.
@@ -263,6 +265,13 @@ Features:
 
 Deliverable:
 Inventory insights.
+
+### What was built
+- `GET /api/inventory/low-stock?threshold=10` — produk dengan stok di bawah threshold
+- `GET /api/inventory/suggested-restock` — rekomendasi restock berdasarkan avg daily sales 30 hari
+- `GET /api/inventory/dead-stock?days=90` — produk tidak terjual dalam N hari
+- Suggested qty = max(10, avg_daily_sales × 14) — cukup untuk 2 minggu
+- InventoryInsightController terpisah, semua read-only
 
 ---
 
