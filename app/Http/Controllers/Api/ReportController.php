@@ -35,7 +35,7 @@ class ReportController extends Controller
             default => Carbon::parse($date)->endOfDay(),
         };
 
-        $summary = Sale::whereBetween('created_at', [$startDate, $endDate])
+        $summary = Sale::whereBetween('created_at', [$startDate, $endDate], 'and', false)
             ->selectRaw('
                 COUNT(*) as total_transactions,
                 COALESCE(SUM(total), 0) as total_revenue,
