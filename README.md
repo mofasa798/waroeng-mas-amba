@@ -74,7 +74,6 @@
 │   ├── Unit/
 │   └── TestCase.php
 ├── Procfile                       # Railway deployment
-└── railpack.toml                  # Railway build config (Railpack)
 ```
 
 ---
@@ -251,7 +250,7 @@ FRONTEND_URL=https://your-frontend.vercel.app
 SANCTUM_STATEFUL_DOMAINS=your-frontend.vercel.app
 ```
 
-4. Deploy — Railway auto-detects Laravel via Railpack (`railpack.toml`)
+4. Deploy — Railpack auto-detects Laravel dari `composer.json` dan `Procfile`
 5. Jalankan migrasi via Railway CLI atau dashboard shell:
    ```
    php artisan migrate --force
