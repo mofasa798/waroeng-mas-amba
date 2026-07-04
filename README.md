@@ -2,7 +2,7 @@
 
 > A simple, fast, and maintainable POS & inventory system for a small family-owned grocery store.
 
-**Tech Stack:** Laravel (backend) + Next.js (frontend) + PostgreSQL + Railway
+**Tech Stack:** Laravel 13 (backend) + Next.js 15 / React 19 (frontend) + MySQL (local) / PostgreSQL (production) + Railway
 
 ---
 
@@ -11,20 +11,70 @@
 ```
 ├── app/
 │   ├── Http/
-│   │   ├── Controllers/Api/   # API controllers
-│   │   └── Middleware/         # is_admin middleware
-│   ├── Models/                 # Eloquent models
-├── config/                     # Laravel config files
+│   │   ├── Controllers/Api/       # API controllers
+│   │   │   ├── AuthController.php
+│   │   │   ├── CategoryController.php
+│   │   │   ├── InventoryInsightController.php
+│   │   │   ├── PosController.php
+│   │   │   ├── ProductController.php
+│   │   │   ├── ReportController.php
+│   │   │   ├── StockMovementController.php
+│   │   │   ├── SupplierController.php
+│   │   │   └── UserController.php
+│   │   └── Middleware/
+│   │       └── IsAdmin.php        # Admin role middleware
+│   ├── Models/                    # Eloquent models
+│   │   ├── Category.php
+│   │   ├── Product.php
+│   │   ├── Sale.php
+│   │   ├── SaleItem.php
+│   │   ├── StockMovement.php
+│   │   ├── Supplier.php
+│   │   └── User.php
+│   └── Providers/
+├── config/                        # Laravel config files
 ├── database/
-│   ├── migrations/             # Database migrations
-│   ├── factories/              # Model factories (testing)
-│   └── seeders/                # Database seeders
-├── frontend/                   # Next.js frontend app
+│   ├── migrations/                # Database migrations
+│   ├── factories/                 # Model factories
+│   └── seeders/
+│       ├── DatabaseSeeder.php     # Creates admin user + calls seeders
+│       ├── CategorySeeder.php
+│       ├── SupplierSeeder.php
+│       └── ProductSeeder.php
+├── frontend/                      # Next.js 15 frontend (App Router)
+│   └── src/
+│       ├── app/
+│       │   ├── (dashboard)/       # Authenticated dashboard group
+│       │   │   ├── categories/
+│       │   │   ├── inventory/
+│       │   │   ├── pos/
+│       │   │   ├── products/
+│       │   │   ├── sales/
+│       │   │   ├── suppliers/
+│       │   │   ├── layout.tsx
+│       │   │   └── page.tsx
+│       │   ├── login/
+│       │   ├── register/
+│       │   ├── globals.css
+│       │   ├── layout.tsx
+│       │   └── providers.tsx
+│       ├── components/
+│       │   ├── Header.tsx
+│       │   ├── Sidebar.tsx
+│       │   └── Toast.tsx
+│       └── lib/
+│           ├── api.ts             # Axios instance with auth interceptor
+│           ├── auth.tsx           # Auth context & provider
+│           └── utils.ts           # Utility helpers
 ├── routes/
-│   ├── api.php                 # API routes
-│   └── web.php                 # Web routes (minimal)
-├── tests/                      # PHPUnit tests
-└── Procfile                    # Railway deployment
+│   ├── api.php                    # API routes
+│   └── web.php                    # Web routes (minimal)
+├── tests/
+│   ├── Feature/
+│   ├── Unit/
+│   └── TestCase.php
+├── Procfile                       # Railway deployment
+└── nixpacks.toml                  # Railway build config
 ```
 
 ---
@@ -36,7 +86,7 @@
 - PHP 8.3+
 - Composer
 - Node.js 20+
-- SQLite (local) or PostgreSQL (production)
+- MySQL (local via Laragon) atau PostgreSQL (production)
 
 ### Setup Backend
 
@@ -48,7 +98,15 @@ composer install
 cp .env.example .env
 php artisan key:generate
 
-# Database (SQLite for local — already set in .env)
+# Sesuaikan .env untuk local (MySQL):
+#   DB_CONNECTION=mysql
+#   DB_HOST=127.0.0.1
+#   DB_PORT=3306
+#   DB_DATABASE=waroeng_mas_amba
+#   DB_USERNAME=root
+#   DB_PASSWORD=
+
+# Buat database & jalankan migrasi
 php artisan migrate --seed
 php artisan serve --port=8000
 ```
@@ -194,58 +252,51 @@ SANCTUM_STATEFUL_DOMAINS=your-frontend.railway.app
 ```
 
 4. Deploy — Railway auto-detects Laravel via `nixpacks.toml`
-5. Run migrations:
-   `php artisan migrate --force`
-   `php artisan db:seed --force`
+5. Run migrations via Railway CLI or dashboard shell:
+   ```
+   php artisan migrate --force
+   php artisan db:seed --force
+   ```
 
 ### Frontend
 
-1. Create a new Railway project for `frontend/`
+1. Create a new Railway project for `frontend/` (root directory set to `frontend`)
 2. Set environment variable:
    `NEXT_PUBLIC_API_URL=https://your-backend.railway.app/api`
-3. Build command: `npm run build`
-4. Start command: `npm start`
+3. Railway auto-detects Next.js; build command: `npm run build`, start: `npm start`
 
 ---
 
 ## Database Principles
 
 - Stock is **never stored directly** — calculated from `stock_movements` table
-- Every stock change creates a `StockMovement` record (type: in/out/adjustment)
+- Every stock change creates a `StockMovement` record (type: `in`, `out`, or `adjustment`)
+- Stock adjustments are **admin-only** (protected by `is_admin` middleware)
 - All stock operations use **database transactions**
 - Prices stored as **integers** (rupiah, e.g. 10000 = Rp 10.000)
-- Sale prices are **snapshots** at time of transaction
+- Sale prices are **snapshots** at time of transaction (stored in `sale_items`)
+
+---
+
+## Key Dependencies
+
+### Backend (Laravel 13)
+| Package | Purpose |
+|---|---|
+| `laravel/sanctum` ^4.3 | API token authentication |
+| `laravel/tinker` ^3.0 | Interactive REPL |
+
+### Frontend (Next.js 15)
+| Package | Purpose |
+|---|---|
+| `react` / `react-dom` ^19 | UI framework |
+| `axios` ^1.7 | HTTP client |
+| `lucide-react` ^0.460 | Icon library |
+| `tailwindcss` ^4.0 | Utility-first CSS |
+| `clsx` + `tailwind-merge` + `class-variance-authority` | Styling utilities |
 
 ---
 
 ## License
 
 MIT
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
-```
-
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
