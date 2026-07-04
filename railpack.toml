@@ -1,0 +1,6 @@
+# Railway deployment config for Laravel (Railpack)
+[build]
+provider = "railpack"
+
+[deploy]
+# Railpack auto-detects Laravel via composer.json + Procfile
