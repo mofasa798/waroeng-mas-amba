@@ -2,7 +2,7 @@
 
 > A simple, fast, and maintainable POS & inventory system for a small family-owned grocery store.
 
-**Tech Stack:** Laravel 13 (backend) + Next.js 15 / React 19 (frontend) + MySQL (local) / PostgreSQL (production) + Railway
+**Tech Stack:** Laravel 13 (backend) + Next.js 15 / React 19 (frontend) + MySQL (local) / PostgreSQL (production) + Railway (backend) + Vercel (frontend)
 
 ---
 
@@ -223,17 +223,17 @@ php artisan test --filter AuthTest
 
 ---
 
-## Deployment (Railway)
+## Deployment
 
-### Backend
+### Backend — Railway
 
-1. Create a Railway account and connect your GitHub repo
-2. Create a PostgreSQL database on Railway
-3. Set environment variables in Railway dashboard:
+1. Buat akun Railway dan hubungkan GitHub repo
+2. Buat PostgreSQL database di Railway
+3. Set environment variables di Railway dashboard:
 
 ```
 APP_ENV=production
-APP_KEY=<generate with: php artisan key:generate --show>
+APP_KEY=<generate dengan: php artisan key:generate --show>
 APP_URL=https://your-backend.railway.app
 APP_DEBUG=false
 DB_CONNECTION=pgsql
@@ -247,23 +247,25 @@ SESSION_DRIVER=file
 CACHE_STORE=file
 QUEUE_CONNECTION=sync
 LOG_CHANNEL=stderr
-FRONTEND_URL=https://your-frontend.railway.app
-SANCTUM_STATEFUL_DOMAINS=your-frontend.railway.app
+FRONTEND_URL=https://your-frontend.vercel.app
+SANCTUM_STATEFUL_DOMAINS=your-frontend.vercel.app
 ```
 
 4. Deploy — Railway auto-detects Laravel via `nixpacks.toml`
-5. Run migrations via Railway CLI or dashboard shell:
+5. Jalankan migrasi via Railway CLI atau dashboard shell:
    ```
    php artisan migrate --force
    php artisan db:seed --force
    ```
 
-### Frontend
+### Frontend — Vercel
 
-1. Create a new Railway project for `frontend/` (root directory set to `frontend`)
-2. Set environment variable:
-   `NEXT_PUBLIC_API_URL=https://your-backend.railway.app/api`
-3. Railway auto-detects Next.js; build command: `npm run build`, start: `npm start`
+1. Buat akun Vercel dan hubungkan GitHub repo (arahkan root ke `frontend/`)
+2. Set environment variable di Vercel dashboard:
+   ```
+   NEXT_PUBLIC_API_URL=https://your-backend.railway.app/api
+   ```
+3. Vercel auto-detects Next.js — build & deploy otomatis tiap push
 
 ---
 
