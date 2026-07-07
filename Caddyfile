@@ -6,9 +6,8 @@
     auto_https off
 }
 
-# Railway provides PORT env var
-# Listen on all interfaces (required for Railway proxy)
-:{$PORT} {
+# Listen on Railway's default port 8080
+:8080 {
     # Laravel serves from the public/ directory
     root * /app/public
 
@@ -20,11 +19,4 @@
 
     # Serve static files
     file_server
-
-    # Security headers
-    header / {
-        X-Content-Type-Options "nosniff"
-        X-Frame-Options "DENY"
-        X-XSS-Protection "1; mode=block"
-    }
 }
