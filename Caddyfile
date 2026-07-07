@@ -1,0 +1,29 @@
+{
+    # Enable FrankenPHP (embedded PHP in Caddy)
+    frankenphp
+
+    # Disable auto TLS since Railway handles HTTPS
+    auto_https off
+}
+
+# Railway provides PORT env var, default 8080
+{$PORT:8080} {
+    # Laravel serves from the public/ directory
+    root * /app/public
+
+    # Compress responses
+    encode zstd br gzip
+
+    # Handle PHP files via FrankenPHP's embedded PHP
+    php_fastcgi
+
+    # Serve static files
+    file_server
+
+    # Security headers
+    header / {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+    }
+}
