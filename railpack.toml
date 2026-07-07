@@ -2,6 +2,5 @@
 [build]
 provider = "railpack"
 
-# Add pdo_pgsql + pgsql for Supabase PostgreSQL
-[packages.php]
+[php]
 extensions = ["pdo", "pdo_pgsql", "pgsql", "ctype", "curl", "dom", "fileinfo", "filter", "hash", "mbstring", "openssl", "pcre", "session", "tokenizer", "xml"]
