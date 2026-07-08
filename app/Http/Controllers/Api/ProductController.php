@@ -13,10 +13,16 @@ class ProductController extends Controller
 {
     public function index(): JsonResponse
     {
-        $products = Product::with('category', 'supplier')->orderBy('name')->get()->map(function ($product) {
-            $product->stock = $product->current_stock;
-            return $product;
-        });
+        $products = Product::with('category', 'supplier')
+            ->select('products.*')
+            ->selectRaw('
+                COALESCE((SELECT SUM(quantity) FROM stock_movements WHERE stock_movements.product_id = products.id AND stock_movements.type = \'in\'), 0)
+                - COALESCE((SELECT SUM(quantity) FROM stock_movements WHERE stock_movements.product_id = products.id AND stock_movements.type = \'out\'), 0)
+                + COALESCE((SELECT SUM(quantity) FROM stock_movements WHERE stock_movements.product_id = products.id AND stock_movements.type = \'adjustment\'), 0)
+                as stock
+            ')
+            ->orderBy('name')
+            ->get();
 
         return response()->json($products);
     }
