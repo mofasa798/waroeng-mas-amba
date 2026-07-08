@@ -27,7 +27,7 @@ class PosController extends Controller
         $products = Product::with('category')
             ->withStock()
             ->where(function ($query) use ($q) {
-                $query->where('LOWER(name) LIKE ?', ['%' . strtolower($q) . '%'])
+                $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($q) . '%'])
                       ->orWhere('barcode', $q);
             })
             ->orderBy('name')
