@@ -26,8 +26,10 @@ class PosController extends Controller
 
         $products = Product::with('category')
             ->withStock()
-            ->where('name', 'like', "%{$q}%")
-            ->orWhere('barcode', $q)
+            ->where(function ($query) use ($q) {
+                $query->where('name', 'like', "%{$q}%")
+                      ->orWhere('barcode', $q);
+            })
             ->orderBy('name')
             ->get();
 
