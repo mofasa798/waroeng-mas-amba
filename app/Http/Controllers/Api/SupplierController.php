@@ -59,10 +59,7 @@ class SupplierController extends Controller
      */
     public function products(Supplier $supplier): JsonResponse
     {
-        $products = $supplier->products()->with('category')->get()->map(function ($product) {
-            $product->stock = $product->current_stock;
-            return $product;
-        });
+        $products = $supplier->products()->with('category')->withStock()->get();
 
         return response()->json($products);
     }

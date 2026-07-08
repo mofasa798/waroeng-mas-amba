@@ -128,31 +128,30 @@ class ReportController extends Controller
         $days = (int) $request->get('days', 30);
         $since = now()->subDays($days);
 
-        // Get all products with their total sales in the period
-        $products = Product::withCount(['stockMovements as total_sold' => function ($q) use ($since) {
-            $q->where('type', 'out')
-              ->where('created_at', '>=', $since);
-        }])
-        ->with(['stockMovements' => function ($q) {
-            $q->where('type', 'out')
-              ->orderByDesc('created_at')
-              ->limit(1);
-        }])
-        ->orderBy('total_sold')
-        ->orderBy('name')
-        ->get()
-        ->map(function ($product) {
-            $product->stock = $product->current_stock;
-            $lastMovement = $product->stockMovements->first();
-
-            return [
-                'product_id' => $product->id,
-                'product_name' => $product->name,
-                'current_stock' => $product->stock,
-                'total_sold' => (int) $product->total_sold,
-                'last_sold_date' => $lastMovement?->created_at?->format('Y-m-d H:i'),
-            ];
-        });
+        $products = Product::withStock()
+            ->withCount(['stockMovements as total_sold' => function ($q) use ($since) {
+                $q->where('type', 'out')->where('created_at', '>=', $since);
+            }])
+            ->selectSub(
+                StockMovement::select('created_at')
+                    ->whereColumn('product_id', 'products.id')
+                    ->where('type', 'out')
+                    ->orderByDesc('created_at')
+                    ->limit(1),
+                'last_sold_at'
+            )
+            ->orderBy('total_sold')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($p) {
+                return [
+                    'product_id' => $p->id,
+                    'product_name' => $p->name,
+                    'current_stock' => (int) $p->stock,
+                    'total_sold' => (int) $p->total_sold,
+                    'last_sold_date' => $p->last_sold_at ? date('Y-m-d H:i', strtotime($p->last_sold_at)) : null,
+                ];
+            });
 
         return response()->json([
             'days' => $days,

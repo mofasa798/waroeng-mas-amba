@@ -25,14 +25,11 @@ class PosController extends Controller
         }
 
         $products = Product::with('category')
+            ->withStock()
             ->where('name', 'like', "%{$q}%")
             ->orWhere('barcode', $q)
             ->orderBy('name')
-            ->get()
-            ->map(function ($product) {
-                $product->stock = $product->current_stock;
-                return $product;
-            });
+            ->get();
 
         return response()->json($products);
     }

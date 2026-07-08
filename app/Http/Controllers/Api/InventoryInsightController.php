@@ -18,22 +18,18 @@ class InventoryInsightController extends Controller
         $threshold = (int) $request->get('threshold', 10);
 
         $products = Product::with('category:id,name', 'supplier:id,name')
+            ->withStock()
             ->orderBy('name')
             ->get()
-            ->filter(function ($product) use ($threshold) {
-                $product->stock = $product->current_stock;
-                return $product->stock < $threshold;
-            })
+            ->filter(fn ($p) => $p->stock < $threshold)
             ->values()
-            ->map(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'current_stock' => $product->stock,
-                    'category' => $product->category?->name,
-                    'supplier' => $product->supplier?->name,
-                ];
-            });
+            ->map(fn ($p) => [
+                'id' => $p->id,
+                'name' => $p->name,
+                'current_stock' => (int) $p->stock,
+                'category' => $p->category?->name,
+                'supplier' => $p->supplier?->name,
+            ]);
 
         return response()->json([
             'threshold' => $threshold,
@@ -49,42 +45,36 @@ class InventoryInsightController extends Controller
     {
         $since = now()->subDays(30);
 
+        // Build 30-day sales subquery
         $products = Product::with('category:id,name', 'supplier:id,name')
+            ->withStock()
+            ->selectSub(
+                StockMovement::selectRaw('COALESCE(SUM(quantity), 0)')
+                    ->whereColumn('product_id', 'products.id')
+                    ->where('type', 'out')
+                    ->where('created_at', '>=', $since),
+                'total_sold_30d'
+            )
             ->orderBy('name')
             ->get()
-            ->map(function ($product) use ($since) {
-                $product->stock = $product->current_stock;
-
-                // Calculate 30-day sales
-                $totalSold = StockMovement::where('product_id', '=', $product->id, 'and')
-                    ->where('type', 'out')
-                    ->where('created_at', '>=', $since)
-                    ->sum('quantity');
-
-                $avgDailySales = $totalSold > 0 ? round($totalSold / 30, 1) : 0;
-
-                // Suggested qty = enough for 14 days
+            ->map(function ($p) {
+                $avgDailySales = $p->total_sold_30d > 0 ? round($p->total_sold_30d / 30, 1) : 0;
                 $suggestedQty = $avgDailySales > 0
-                    ? max(0, (int) ceil($avgDailySales * 14) - $product->stock)
+                    ? max(0, (int) ceil($avgDailySales * 14) - (int) $p->stock)
                     : 0;
 
-                // Low stock criteria: stock < 10 OR best-seller with stock < 20% of avg sales
-                $isLowStock = $product->stock < 10;
-                $isBestSellerLow = ($avgDailySales > 1 && $product->stock < $avgDailySales * 14 * 0.2);
-
-                if ($suggestedQty < 0) {
-                    $suggestedQty = 0;
-                }
+                $isLowStock = (int) $p->stock < 10;
+                $isBestSellerLow = ($avgDailySales > 1 && (int) $p->stock < $avgDailySales * 14 * 0.2);
 
                 return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'current_stock' => $product->stock,
+                    'id' => $p->id,
+                    'name' => $p->name,
+                    'current_stock' => (int) $p->stock,
                     'avg_daily_sales_30d' => $avgDailySales,
                     'suggested_restock_qty' => $suggestedQty > 0 ? $suggestedQty : max(10, (int) ceil($avgDailySales * 14)),
-                    'category' => $product->category?->name,
-                    'supplier' => $product->supplier?->name,
-                    'needs_restock' => $isLowStock || $isBestSellerLow || ($avgDailySales > 0 && $product->stock < $avgDailySales * 14),
+                    'category' => $p->category?->name,
+                    'supplier' => $p->supplier?->name,
+                    'needs_restock' => $isLowStock || $isBestSellerLow || ($avgDailySales > 0 && (int) $p->stock < $avgDailySales * 14),
                 ];
             })
             ->filter(fn ($item) => $item['needs_restock'])
@@ -105,37 +95,38 @@ class InventoryInsightController extends Controller
         $since = now()->subDays($days);
 
         $products = Product::with('category:id,name', 'supplier:id,name')
-            ->orderBy('name')
-            ->get()
-            ->map(function ($product) use ($since, $days) {
-                $product->stock = $product->current_stock;
-
-                // Find last sale (stock_movement type: out)
-                $lastSale = StockMovement::where('product_id', '=', $product->id, 'and')
+            ->withStock()
+            ->selectSub(
+                StockMovement::selectRaw('COALESCE(SUM(quantity), 0)')
+                    ->whereColumn('product_id', 'products.id')
+                    ->where('type', 'out')
+                    ->where('created_at', '>=', $since),
+                'sales_in_period'
+            )
+            ->selectSub(
+                StockMovement::select('created_at')
+                    ->whereColumn('product_id', 'products.id')
                     ->where('type', 'out')
                     ->orderByDesc('created_at')
-                    ->first();
-
-                $lastSoldDate = $lastSale?->created_at;
-                $daysSinceLastSold = $lastSoldDate
-                    ? (int) $lastSoldDate->diffInDays(now())
-                    : null; // never sold
-
-                $salesInPeriod = StockMovement::where('product_id', '=', $product->id, 'and')
-                    ->where('type', 'out')
-                    ->where('created_at', '>=', $since)
-                    ->sum('quantity');
+                    ->limit(1),
+                'last_sold_at'
+            )
+            ->orderBy('name')
+            ->get()
+            ->map(function ($p) use ($days) {
+                $lastSoldDate = $p->last_sold_at;
+                $daysSince = $lastSoldDate ? (int) now()->diffInDays($lastSoldDate) : null;
 
                 return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'current_stock' => $product->stock,
-                    'total_sold_in_days' => (int) $salesInPeriod,
-                    'last_sold_date' => $lastSoldDate?->format('Y-m-d'),
-                    'days_since_last_sold' => $daysSinceLastSold,
-                    'category' => $product->category?->name,
-                    'supplier' => $product->supplier?->name,
-                    'is_dead' => $salesInPeriod === 0 || ($daysSinceLastSold !== null && $daysSinceLastSold >= $days),
+                    'id' => $p->id,
+                    'name' => $p->name,
+                    'current_stock' => (int) $p->stock,
+                    'total_sold_in_days' => (int) $p->sales_in_period,
+                    'last_sold_date' => $lastSoldDate ? date('Y-m-d', strtotime($lastSoldDate)) : null,
+                    'days_since_last_sold' => $daysSince,
+                    'category' => $p->category?->name,
+                    'supplier' => $p->supplier?->name,
+                    'is_dead' => (int) $p->sales_in_period === 0 || ($daysSince !== null && $daysSince >= $days),
                 ];
             })
             ->filter(fn ($item) => $item['is_dead'])

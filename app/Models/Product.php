@@ -51,4 +51,17 @@ class Product extends Model
 
         return ($in - $out) + $adjustment;
     }
+
+    /**
+     * Scope: add stock as a subquery column (avoids N+1 queries).
+     */
+    public function scopeWithStock($query): void
+    {
+        $query->select('products.*')->selectRaw('
+            COALESCE((SELECT SUM(quantity) FROM stock_movements WHERE stock_movements.product_id = products.id AND stock_movements.type = \'in\'), 0)
+            - COALESCE((SELECT SUM(quantity) FROM stock_movements WHERE stock_movements.product_id = products.id AND stock_movements.type = \'out\'), 0)
+            + COALESCE((SELECT SUM(quantity) FROM stock_movements WHERE stock_movements.product_id = products.id AND stock_movements.type = \'adjustment\'), 0)
+            as stock
+        ');
+    }
 }
