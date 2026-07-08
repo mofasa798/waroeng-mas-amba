@@ -2,7 +2,7 @@
 
 > A simple, fast, and maintainable POS & inventory system for a small family-owned grocery store.
 
-**Tech Stack:** Laravel 13 (backend) + Next.js 15 / React 19 (frontend) + MySQL (local) / PostgreSQL (production) + Railway (backend) + Vercel (frontend)
+**Tech Stack:** Laravel 13 (backend) + Next.js 15 / React 19 (frontend) + MySQL (local) / Supabase PostgreSQL (production) + Railway (backend) + Vercel (frontend)
 
 ---
 
@@ -73,7 +73,10 @@
 │   ├── Feature/
 │   ├── Unit/
 │   └── TestCase.php
+├── Caddyfile                      # FrankenPHP config (Railway)
 ├── Procfile                       # Railway deployment
+├── railpack.toml                  # Railpack PHP extensions config
+├── router.php                     # PHP built-in server router (fallback)
 ```
 
 ---
@@ -224,11 +227,22 @@ php artisan test --filter AuthTest
 
 ## Deployment
 
-### Backend — Railway
+### Backend — Railway (Railpack + FrankenPHP)
+
+Railway menggunakan [Railpack](https://railpack.com) sebagai build driver yang auto-detect Laravel, menambahkan ekstensi PHP via `railpack.toml`, dan menggunakan **FrankenPHP** (Caddy + PHP embedded) sebagai web server.
+
+**File konfigurasi khusus Railway:**
+- `Procfile` → `frankenphp php-server --root /app/public --listen :8080`
+- `Caddyfile` → Custom FrankenPHP config (fallback untuk `frankenphp run`)
+- `railpack.toml` → PHP extensions (`pdo_pgsql`, dll.)
+- `router.php` → Router fallback untuk PHP built-in server
+
+Langkah deployment:
 
 1. Buat akun Railway dan hubungkan GitHub repo
-2. Buat PostgreSQL database di Railway
-3. Set environment variables di Railway dashboard:
+2. Buat project PostgreSQL di **Supabase** (bukan Railway built-in PG)
+3. Aktifkan **SSL** di Supabase (default aktif)
+4. Set environment variables di Railway dashboard:
 
 ```
 APP_ENV=production
@@ -236,11 +250,11 @@ APP_KEY=<generate dengan: php artisan key:generate --show>
 APP_URL=https://your-backend.railway.app
 APP_DEBUG=false
 DB_CONNECTION=pgsql
-DB_HOST=<your-railway-pg-host>
+DB_HOST=db.xxxxxxxxxxxxx.supabase.co
 DB_PORT=5432
-DB_DATABASE=railway
+DB_DATABASE=postgres
 DB_USERNAME=postgres
-DB_PASSWORD=<your-railway-pg-password>
+DB_PASSWORD=<supabase-db-password>
 DB_SSLMODE=require
 SESSION_DRIVER=file
 CACHE_STORE=file
@@ -250,9 +264,9 @@ FRONTEND_URL=https://your-frontend.vercel.app
 SANCTUM_STATEFUL_DOMAINS=your-frontend.vercel.app
 ```
 
-4. Deploy — Railpack auto-detects Laravel dari `composer.json` dan `Procfile`
-5. Jalankan migrasi via Railway CLI atau dashboard shell:
-   ```
+5. Push ke GitHub → Railway auto-deploy
+6. Setelah deploy, jalankan migrasi via Railway Shell:
+   ```bash
    php artisan migrate --force
    php artisan db:seed --force
    ```
